@@ -29,21 +29,16 @@ def _get_default_letters(model_admin=None):
         return set(default_letters)
 
 
-def _get_available_letters(field_name, db_table):
+def _get_available_letters(model, site):
     """
-    Makes a query to the database to return the first character of each
-    value of the field and table passed in.
-    
-    Returns a set that represents the letters that exist in the database.
+    Gets ActiveAlphabet instance for provided model on specified site
     """
-    from django.db import connection
-    qn = connection.ops.quote_name
-    sql = "SELECT DISTINCT UPPER(SUBSTR(%s, 1, 1)) as letter FROM %s" \
-                % (qn(field_name), qn(db_table))
-    cursor = connection.cursor()
-    cursor.execute(sql)
-    rows = cursor.fetchall() or ()
-    return set([row[0] for row in rows if row[0] is not None])
+    from alphafilter.models import ActiveAlphabet, get_object_or_none
+    available = get_object_or_none(ActiveAlphabet, site=site, content_type=model._meta.module_name)
+    if available:
+        return set([x for x in available.active_alphabet.decode('utf8')])
+    else:
+        return set([])
 
 
 def alphabet(cl):
