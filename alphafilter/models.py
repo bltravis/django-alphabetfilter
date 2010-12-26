@@ -50,8 +50,7 @@ def alpha_check(sender, **kwargs):
                         new_active = ''.join(_new_active.sort())
                         active_alphabet.active_alphabet = new_active
                         active_alphabet.save()
-     else:
+    else:
         for field_name in sender.alphafilter_on:
             active_alphabet = ActiveAlphabet(site=Site.objects.get_current(), content_type=ContentType.objects.get_for_model(sender), content_type_field=field_name, active_alphabet=u'%s' % (instance._meta.get_field(field_name)[0].upper(),))
             active_alphabet.save()
-    
