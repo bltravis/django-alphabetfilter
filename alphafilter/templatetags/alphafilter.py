@@ -2,6 +2,9 @@ from django.utils.translation import ugettext as _
 from django.template import (Library, Node, Variable, VariableDoesNotExist,
                             TemplateSyntaxError, RequestContext, Context)
 from django.template.loader import get_template
+from django.conf import settings
+
+from django.contrib.sites.models import Site
 
 register = Library()
 
@@ -29,16 +32,34 @@ def _get_default_letters(model_admin=None):
         return set(default_letters)
 
 
-def _get_available_letters(model, site):
+def _get_available_letters(model, site, field_name):
     """
-    Gets ActiveAlphabet instance for provided model on specified site
+    Gets ActiveAlphabet instance for provided model on specified site, or
+
+    Makes a query to the database to return the first character of each
+    value of the field and table passed in.
+    
+    Returns a set that represents the letters that exist in the database.
     """
-    from alphafilter.models import ActiveAlphabet, get_object_or_none
-    available = get_object_or_none(ActiveAlphabet, site=site, content_type=model._meta.module_name)
-    if available:
-        return set([x for x in available.active_alphabet.decode('utf8')])
+    if site == 'master':
+        from django.db import connection
+        qn = connection.ops.quote_name
+        sql = "SELECT DISTINCT UPPER(SUBSTR(%s, 1, 1)) as letter FROM %s" \
+                    % (qn(field_name), qn(model._meta.db_table))
+        cursor = connection.cursor()
+        cursor.execute(sql)
+        rows = cursor.fetchall() or ()
+        return set([row[0] for row in rows if row[0] is not None])
     else:
-        return set([])
+        """
+        Gets ActiveAlphabet instance for provided model on specified site
+        """
+        from alphafilter.models import ActiveAlphabet, get_object_or_none
+        available = get_object_or_none(ActiveAlphabet, site=site, content_type=model._meta.module_name)
+        if available:
+            return set([x for x in available.active_alphabet.decode('utf8')])
+        else:
+            return set([])
 
 
 def alphabet(cl):
@@ -48,12 +69,17 @@ def alphabet(cl):
     """
     if not getattr(cl.model_admin, 'alphabet_filter', False):
         return
+    is_db_master = getattr(cl.model_admin, 'db_master_admin', False)
+    if is_db_master:
+        site = 'master'
+    else:
+        site = Site.objects.get_current()
     field_name = cl.model_admin.alphabet_filter
     alpha_field = '%s__istartswith' % field_name
     alpha_lookup = cl.params.get(alpha_field, '')
     link = lambda d: cl.get_query_string(d)
     
-    letters_used = _get_available_letters(field_name, cl.model._meta.db_table)
+    letters_used = _get_available_letters(cl.model, site, field_name)
     all_letters = list(_get_default_letters(cl.model_admin) | letters_used)
     all_letters.sort()
     
@@ -109,7 +135,7 @@ class AlphabetFilterNode(Node):
             qstring = ''
         
         link = lambda d: "?%s%s" % (qstring, "%s=%s" % d.items()[0])
-        letters_used = _get_available_letters(field_name, qset.model._meta.db_table)
+        letters_used = _get_available_letters(qset.model, Site.objects.get_current(), field_name)
         all_letters = list(_get_default_letters(None) | letters_used)
         all_letters.sort()
         
