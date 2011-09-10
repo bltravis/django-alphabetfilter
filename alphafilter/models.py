@@ -49,7 +49,7 @@ def alpha_clean(sender, **kwargs):
                     active = active_alphabet.active_alphabet
                     first_letter = instance._meta.get_field(field_name).value_from_object(instance)[0].upper()
                     if first_letter in active:
-                        still_active = Obituary.objects.filter(client__site=Site.objects.get_current(), **{'%s__istartswith': first_letter % field_name})
+                        still_active = sender.objects.filter(client__site=Site.objects.get_current(), **{'%s__istartswith': first_letter % field_name})
                         if still_active:
                             return ''
                         else:
