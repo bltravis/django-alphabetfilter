@@ -26,8 +26,6 @@ def _get_default_letters(model_admin=None):
         default_letters = model_admin.DEFAULT_ALPHABET
     if callable(default_letters):
         return set(default_letters())
-    elif isinstance(default_letters, unicode):
-        return set([x for x in default_letters])
     elif isinstance(default_letters, str):
         return set([x for x in default_letters.decode('utf8')])
     elif isinstance(default_letters, (tuple, list)):
@@ -58,11 +56,11 @@ def _get_available_letters(model, site, field_name):
         """
         ActiveAlphabet = get_model('alphafilter', 'activealphabet')
         try:
-            available = ActiveAlphabet.objects.get(site=site, content_type=ContentType.objects.get(name=model._meta.model_name), content_type_field=field_name)
+            available = ActiveAlphabet.objects.get(site=site, content_type=ContentType.objects.get(model=model._meta.model_name,app_label=model._meta.app_label), content_type_field=field_name)
         except ActiveAlphabet.DoesNotExist:
             available = None
         if available:
-            return set([x for x in available.active_alphabet.decode('utf8')])
+            return set([x for x in available.active_alphabet])
         else:
             return set([])
 
@@ -139,7 +137,7 @@ class AlphabetFilterNode(Node):
             alpha_lookup = ''
             qstring = ''
         
-        link = lambda d: "?%s%s" % (qstring, "%s=%s" % d.items()[0])
+        link = lambda d: "?%s%s" % (qstring, "%s=%s" % tuple(d.items())[0])
         letters_used = _get_available_letters(qset.model, Site.objects.get_current(), field_name)
         all_letters = list(_get_default_letters(None) | letters_used)
         all_letters.sort()
