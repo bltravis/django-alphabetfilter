@@ -1,8 +1,8 @@
 """
 A generic view for filtering querysets via alphafilter
 """
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
+# from django.template import RequestContext
 
 def alphafilter(request, queryset, template):
     """
@@ -15,8 +15,8 @@ def alphafilter(request, queryset, template):
             qs_filter[str(key)] = request.GET[key]
             break
     
-    return render_to_response(
+    return render(
+        request,
         template, 
-        {'objects': queryset.filter(**qs_filter)}, 
-        context_instance=RequestContext(request)
+        {'objects': queryset.filter(**qs_filter)}
     )
