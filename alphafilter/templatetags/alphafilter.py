@@ -58,7 +58,7 @@ def _get_available_letters(model, site, field_name):
         """
         ActiveAlphabet = get_model('alphafilter', 'activealphabet')
         try:
-            available = ActiveAlphabet.objects.get(site=site, content_type=ContentType.objects.get(name=model._meta.module_name), content_type_field=field_name)
+            available = ActiveAlphabet.objects.get(site=site, content_type=ContentType.objects.get(name=model._meta.model_name), content_type_field=field_name)
         except ActiveAlphabet.DoesNotExist:
             available = None
         if available:
