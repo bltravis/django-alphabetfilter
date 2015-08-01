@@ -26,7 +26,7 @@ def alpha_check(sender, **kwargs):
             for field_name in sender.alphafilter_on:
                 if field_name == active_alphabet.content_type_field:
                     active = active_alphabet.active_alphabet
-                    first_letter = instance._meta.get_field(field_name).value_from_object(instance)[0].upper()
+                    first_letter = instance._meta.get_field(field_name).value_from_object(instance).split()[-1][0].upper()
                     if not first_letter in active:
                         new_active = active + first_letter
                         _new_active = list(new_active)
@@ -36,7 +36,7 @@ def alpha_check(sender, **kwargs):
                         active_alphabet.save()
     else:
         for field_name in sender.alphafilter_on:
-            active_alphabet = ActiveAlphabet(site=Site.objects.get_current(), content_type=ContentType.objects.get_for_model(sender), content_type_field=field_name, active_alphabet=u'%s' % (instance._meta.get_field(field_name)[0].upper(),))
+            active_alphabet = ActiveAlphabet(site=Site.objects.get_current(), content_type=ContentType.objects.get_for_model(sender), content_type_field=field_name, active_alphabet=u'%s' % (instance._meta.get_field(field_name).split()[-1][0].upper(),))
             active_alphabet.save()
 
 def alpha_clean(sender, **kwargs):
@@ -47,7 +47,7 @@ def alpha_clean(sender, **kwargs):
             for field_name in sender.alphafilter_on:
                 if field_name == active_alphabet.content_type_field:
                     active = active_alphabet.active_alphabet
-                    first_letter = instance._meta.get_field(field_name).value_from_object(instance)[0].upper()
+                    first_letter = instance._meta.get_field(field_name).value_from_object(instance).split()[-1][0].upper()
                     if first_letter in active:
                         still_active = sender.objects.filter(client__site=Site.objects.get_current(), **{'%s__istartswith' % field_name: first_letter})
                         if still_active:
