@@ -1,12 +1,21 @@
+"""
+Django-AlphaFilter provides an admin widget for alphabetical filtering that
+works like date_hierarchy and an template tag for use elsewhere.
+"""
+
 __version_info__ = {
     'major': 0,
-    'minor': 4,
-    'micro': 1,
+    'minor': 8,
+    'micro': 0,
     'releaselevel': 'final',
-    'serial': 1
+    'serial': 0
 }
 
+
 def get_version():
+    """
+    Return the formatted version information
+    """
     vers = ["%(major)i.%(minor)i" % __version_info__, ]
 
     if __version_info__['micro']:
