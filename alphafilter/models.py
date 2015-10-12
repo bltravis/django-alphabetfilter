@@ -2,14 +2,16 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.shortcuts import _get_queryset
+from django.utils.encoding import python_2_unicode_compatible
 
+@python_2_unicode_compatible
 class ActiveAlphabet(models.Model):
     site = models.ForeignKey(Site)
     content_type = models.ForeignKey(ContentType)
     content_type_field = models.CharField(max_length=25)
     active_alphabet = models.CharField(max_length=1000, blank=True, default=u'')
     
-    def __unicode__(self):
+    def __str__(self):
         return u'Active alphabet for %s on %s' % (self.content_type, self.site)
     
     class Meta:

@@ -1,4 +1,5 @@
-from django.db.models import get_model
+# from django.db.models import get_model
+from django.apps import apps
 from django.contrib import admin
 from django.conf import settings
 
@@ -7,7 +8,7 @@ FIELDS = {}
 
 for key, val in MODEL_REGISTRY.items():
     if isinstance(key, basestring):
-        FIELDS[get_model(*key.split('.'))] = val
+        FIELDS[apps.get_model(*key.split('.'))] = val
 
 
 for model,modeladmin in admin.site._registry.items():

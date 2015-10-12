@@ -5,7 +5,8 @@ from django.template.loader import get_template
 from django.conf import settings
 
 from django.contrib.sites.models import Site
-from django.db.models import get_model
+# from django.db.models import get_model
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
 register = Library()
@@ -54,7 +55,7 @@ def _get_available_letters(model, site, field_name):
         """
         Gets ActiveAlphabet instance for provided model on specified site
         """
-        ActiveAlphabet = get_model('alphafilter', 'activealphabet')
+        ActiveAlphabet = apps.get_model('alphafilter', 'activealphabet')
         try:
             available = ActiveAlphabet.objects.get(site=site, content_type=ContentType.objects.get(model=model._meta.model_name,app_label=model._meta.app_label), content_type_field=field_name)
         except ActiveAlphabet.DoesNotExist:
