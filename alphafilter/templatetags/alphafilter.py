@@ -28,7 +28,7 @@ def _get_default_letters(model_admin=None):
     if callable(default_letters):
         return set(default_letters())
     elif isinstance(default_letters, str):
-        return set([x for x in default_letters.decode('utf8')])
+        return set([x for x in default_letters])
     elif isinstance(default_letters, (tuple, list)):
         return set(default_letters)
 
