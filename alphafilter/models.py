@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -10,10 +11,10 @@ class ActiveAlphabet(models.Model):
     content_type = models.ForeignKey(ContentType)
     content_type_field = models.CharField(max_length=25)
     active_alphabet = models.CharField(max_length=1000, blank=True, default=u'')
-    
+
     def __str__(self):
         return u'Active alphabet for %s on %s' % (self.content_type, self.site)
-    
+
     class Meta:
         unique_together = (('site', 'content_type', 'content_type_field'),)
 
@@ -60,5 +61,3 @@ def alpha_clean(sender, **kwargs):
                             new_active = ''.join(old_active)
                             active_alphabet.active_alphabet = new_active
                             active_alphabet.save()
-
-                        

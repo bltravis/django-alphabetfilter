@@ -1,4 +1,5 @@
 # from django.db.models import get_model
+from __future__ import unicode_literals
 from django.apps import apps
 from django.contrib import admin
 from django.conf import settings

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.utils.translation import ugettext as _
 from django.template import (Library, Node, Variable, VariableDoesNotExist,
                             TemplateSyntaxError, RequestContext, Context)
@@ -14,10 +15,10 @@ register = Library()
 def _get_default_letters(model_admin=None):
     """
     Returns the set of letters defined in the configuration variable
-    DEFAULT_ALPHABET. DEFAULT_ALPHABET can be a callable, string, tuple, or 
+    DEFAULT_ALPHABET. DEFAULT_ALPHABET can be a callable, string, tuple, or
     list and returns a set.
-    
-    If a ModelAdmin class is passed, it will look for a DEFAULT_ALPHABET 
+
+    If a ModelAdmin class is passed, it will look for a DEFAULT_ALPHABET
     attribute and use it instead.
     """
     from django.conf import settings
@@ -39,7 +40,7 @@ def _get_available_letters(model, site, field_name):
 
     Makes a query to the database to return the first character of each
     value of the field and table passed in.
-    
+
     Returns a set that represents the letters that exist in the database.
     """
     if site == 'master':
@@ -68,7 +69,7 @@ def _get_available_letters(model, site, field_name):
 
 def alphabet(cl):
     """
-    The inclusion tag that renders the admin/alphabet.html template in the 
+    The inclusion tag that renders the admin/alphabet.html template in the
     admin. Accepts a ChangeList object, which is custom to the admin.
     """
     if not getattr(cl.model_admin, 'alphabet_filter', False):
@@ -82,13 +83,13 @@ def alphabet(cl):
     alpha_field = '%s__istartswith' % field_name
     alpha_lookup = cl.params.get(alpha_field, '')
     link = lambda d: cl.get_query_string(d)
-    
+
     letters_used = _get_available_letters(cl.model, site, field_name)
     all_letters = list(_get_default_letters(cl.model_admin) | letters_used)
     all_letters.sort()
-    
+
     choices = [{
-        'link': link({alpha_field: letter}), 
+        'link': link({alpha_field: letter}),
         'title': letter,
         'active': letter == alpha_lookup,
         'has_entries': letter in letters_used,} for letter in all_letters]
@@ -104,14 +105,14 @@ alphabet = register.inclusion_tag('admin/alphabet.html')(alphabet)
 class AlphabetFilterNode(Node):
     """
     Provide a list of links for first characters on items in a queryset
-    
+
     {% qs_alphabet_filter objects "lastname" "myapp/template.html" %}
     """
     def __init__(self, qset, field_name, template_name="alphafilter/alphabet.html"):
         self.qset = Variable(qset)
         self.field_name = Variable(field_name)
         self.template_name = Variable(template_name)
-    
+
     def render(self, context):
         try:
             qset = self.qset.resolve(context)
@@ -121,13 +122,13 @@ class AlphabetFilterNode(Node):
             field_name = self.field_name.resolve(context)
         except VariableDoesNotExist:
             field_name = self.field_name.var
-        
+
         if not field_name:
             return ''
-        
+
         alpha_field = '%s__istartswith' % field_name
         request = context.get('request', None)
-        
+
         if request is not None:
             alpha_lookup = request.GET.get(alpha_field, '')
             qstring_items = request.GET.copy()
@@ -137,14 +138,14 @@ class AlphabetFilterNode(Node):
         else:
             alpha_lookup = ''
             qstring = ''
-        
+
         link = lambda d: "?%s%s" % (qstring, "%s=%s" % tuple(d.items())[0])
         letters_used = _get_available_letters(qset.model, Site.objects.get_current(), field_name)
         all_letters = list(_get_default_letters(None) | letters_used)
         all_letters.sort()
-        
+
         choices = [{
-            'link': link({alpha_field: letter}), 
+            'link': link({alpha_field: letter}),
             'title': letter,
             'active': letter == alpha_lookup,
             'has_entries': letter in letters_used,} for letter in all_letters]
@@ -155,9 +156,9 @@ class AlphabetFilterNode(Node):
             'has_entries': True
         },]
         ctxt = {'choices': all_letters + choices}
-        
+
         tmpl = get_template(self.template_name)
-        
+
         if request is not None:
             return tmpl.render(RequestContext(request, ctxt))
         else:
@@ -167,11 +168,11 @@ class AlphabetFilterNode(Node):
 def qs_alphabet_filter(parser, token):
     """
     The parser/tokenizer for the queryset alphabet filter.
-    
+
     {% qs_alphabet_filter <queryset> <field name> [<template name>] %}
-    
+
     {% qs_alphabet_filter objects lastname myapp/template.html %}
-    
+
     The template name is optional and uses alphafilter/alphabet.html if not
     specified
     """
