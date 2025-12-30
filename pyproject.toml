@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-alphafilter"
+version = "2.0.0"
+description = "Django-AlphaFilter provides an admin widget for alphabetical filtering that works like date_hierarchy and an template tag for use elsewhere."
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {text = "Apache 2.0"}
+authors = [
+    {name = "Corey Oordt", email = "coreyoordt@gmail.com"},
+    {name = "Brooks Travis", email = "brooks.travis@gmai.com"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 2.2",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "Django>=2.2",
+]
+
+[project.urls]
+Homepage = "http://github.com/coordt/django-alphabetfilter"
+
+[tool.setuptools]
+packages = ["alphafilter", "alphafilter.templatetags"]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-data]
+alphafilter = ["templates/**/*"]

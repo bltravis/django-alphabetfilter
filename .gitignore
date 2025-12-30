@@ -14,3 +14,4 @@ media/css/*.r*.css
 .cache/
 build/
 dist/
+.venv/
