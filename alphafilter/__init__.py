@@ -4,7 +4,7 @@ works like date_hierarchy and an template tag for use elsewhere.
 """
 
 __version_info__ = {
-    'major': 1,
+    'major': 2,
     'minor': 0,
     'micro': 0,
     'releaselevel': 'final',

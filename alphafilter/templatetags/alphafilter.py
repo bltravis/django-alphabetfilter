@@ -1,12 +1,10 @@
-from __future__ import unicode_literals
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.template import (Library, Node, Variable, VariableDoesNotExist,
-                            TemplateSyntaxError, RequestContext, Context)
+                            TemplateSyntaxError, Context)
 from django.template.loader import get_template
 from django.conf import settings
 
 from django.contrib.sites.models import Site
-# from django.db.models import get_model
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
@@ -80,25 +78,25 @@ def alphabet(cl):
     else:
         site = Site.objects.get_current()
     field_name = cl.model_admin.alphabet_filter
-    alpha_field = '%s__istartswith' % field_name
+    alpha_field = f'{field_name}__istartswith'
     alpha_lookup = cl.params.get(alpha_field, '')
-    link = lambda d: cl.get_query_string(d)
 
     letters_used = _get_available_letters(cl.model, site, field_name)
     all_letters = list(_get_default_letters(cl.model_admin) | letters_used)
     all_letters.sort()
 
     choices = [{
-        'link': link({alpha_field: letter}),
+        'link': cl.get_query_string({alpha_field: letter}),
         'title': letter,
         'active': letter == alpha_lookup,
-        'has_entries': letter in letters_used,} for letter in all_letters]
+        'has_entries': letter in letters_used,
+    } for letter in all_letters]
     all_letters = [{
-        'link': cl.get_query_string(None,alpha_field),
+        'link': cl.get_query_string(None, [alpha_field]),
         'title': _('All'),
-        'active': '' == alpha_lookup,
+        'active': alpha_lookup == '',
         'has_entries': True
-    },]
+    }]
     return {'choices': all_letters + choices}
 alphabet = register.inclusion_tag('admin/alphabet.html')(alphabet)
 
@@ -126,7 +124,7 @@ class AlphabetFilterNode(Node):
         if not field_name:
             return ''
 
-        alpha_field = '%s__istartswith' % field_name
+        alpha_field = f'{field_name}__istartswith'
         request = context.get('request', None)
 
         if request is not None:
@@ -134,35 +132,43 @@ class AlphabetFilterNode(Node):
             qstring_items = request.GET.copy()
             if alpha_field in qstring_items:
                 qstring_items.pop(alpha_field)
-            qstring = "&amp;".join(["%s=%s" % (k, v) for k, v in qstring_items])
+            if 'page' in qstring_items:
+                qstring_items.pop('page')
+            qstring = "&".join([f"{k}={v}" for k, v in qstring_items.items()])
         else:
             alpha_lookup = ''
             qstring = ''
 
-        link = lambda d: "?%s%s" % (qstring, "%s=%s" % tuple(d.items())[0])
+        def make_link(d):
+            key, val = list(d.items())[0]
+            if qstring:
+                return f'?{qstring}&{key}={val}'
+            else:
+                return f'?{key}={val}'
+        
         letters_used = _get_available_letters(qset.model, Site.objects.get_current(), field_name)
-        all_letters = list(_get_default_letters(None) | letters_used)
-        all_letters.sort()
+        all_letters = sorted(_get_default_letters(None) | letters_used)
 
         choices = [{
-            'link': link({alpha_field: letter}),
+            'link': make_link({alpha_field: letter}),
             'title': letter,
             'active': letter == alpha_lookup,
-            'has_entries': letter in letters_used,} for letter in all_letters]
+            'has_entries': letter in letters_used,
+        } for letter in all_letters]
         all_letters = [{
-            'link': link({alpha_field: ''}),
+            'link': make_link({alpha_field: ''}),
             'title': _('All'),
-            'active': '' == alpha_lookup,
+            'active': alpha_lookup == '',
             'has_entries': True
-        },]
+        }]
         ctxt = {'choices': all_letters + choices}
 
         tmpl = get_template(self.template_name)
 
         if request is not None:
-            return tmpl.render(RequestContext(request, ctxt))
+            return tmpl.render(ctxt, request)
         else:
-            return tmpl.render(Context(ctxt))
+            return tmpl.render(ctxt)
 
 @register.tag
 def qs_alphabet_filter(parser, token):

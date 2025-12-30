@@ -1,19 +1,16 @@
-from __future__ import unicode_literals
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.shortcuts import _get_queryset
-from django.utils.encoding import python_2_unicode_compatible
 
-@python_2_unicode_compatible
+
 class ActiveAlphabet(models.Model):
-    site = models.ForeignKey(Site)
-    content_type = models.ForeignKey(ContentType)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     content_type_field = models.CharField(max_length=25)
-    active_alphabet = models.CharField(max_length=1000, blank=True, default=u'')
+    active_alphabet = models.CharField(max_length=1000, blank=True, default='')
 
     def __str__(self):
-        return u'Active alphabet for %s on %s' % (self.content_type, self.site)
+        return f'Active alphabet for {self.content_type} on {self.site}'
 
     class Meta:
         unique_together = (('site', 'content_type', 'content_type_field'),)
@@ -30,7 +27,7 @@ def alpha_check(sender, **kwargs):
                 if field_name == active_alphabet.content_type_field:
                     active = active_alphabet.active_alphabet
                     first_letter = instance._meta.get_field(field_name).value_from_object(instance).split()[-1][0].upper()
-                    if not first_letter in active:
+                    if first_letter not in active:
                         new_active = active + first_letter
                         _new_active = list(new_active)
                         _new_active.sort()
@@ -39,7 +36,13 @@ def alpha_check(sender, **kwargs):
                         active_alphabet.save()
     else:
         for field_name in sender.alphafilter_on:
-            active_alphabet = ActiveAlphabet(site=Site.objects.get_current(), content_type=ContentType.objects.get_for_model(sender), content_type_field=field_name, active_alphabet=u'%s' % (instance._meta.get_field(field_name).split()[-1][0].upper(),))
+            first_letter = instance._meta.get_field(field_name).value_from_object(instance).split()[-1][0].upper()
+            active_alphabet = ActiveAlphabet(
+                site=Site.objects.get_current(),
+                content_type=ContentType.objects.get_for_model(sender),
+                content_type_field=field_name,
+                active_alphabet=first_letter
+            )
             active_alphabet.save()
 
 def alpha_clean(sender, **kwargs):
@@ -52,7 +55,7 @@ def alpha_clean(sender, **kwargs):
                     active = active_alphabet.active_alphabet
                     first_letter = instance._meta.get_field(field_name).value_from_object(instance).split()[-1][0].upper()
                     if first_letter in active:
-                        still_active = sender.objects.filter(client__site=Site.objects.get_current(), **{'%s__istartswith' % field_name: first_letter})
+                        still_active = sender.objects.filter(client__site=Site.objects.get_current(), **{f'{field_name}__istartswith': first_letter})
                         if still_active:
                             return ''
                         else:

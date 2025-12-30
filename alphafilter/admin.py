@@ -4,7 +4,6 @@ ALPHAFILTER_ADMIN_FIELDS and replaces it with a new admin class that
 subclasses both the original admin and one with an alphabet_filter attribute
 """
 
-import six
 from django.contrib import admin
 from django.conf import settings
 from django.apps import apps
@@ -14,7 +13,7 @@ MODEL_REGISTRY = getattr(settings, 'ALPHAFILTER_ADMIN_FIELDS', {})
 FIELDS = {
     get_model(*key.split('.')): val
     for key, val in list(MODEL_REGISTRY.items())
-    if isinstance(key, six.string_types)
+    if isinstance(key, str)
 }
 
 for model, modeladmin in list(admin.site._registry.items()):
