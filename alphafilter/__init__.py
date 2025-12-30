@@ -1,13 +1,21 @@
-from __future__ import unicode_literals
+"""
+Django-AlphaFilter provides an admin widget for alphabetical filtering that
+works like date_hierarchy and an template tag for use elsewhere.
+"""
+
 __version_info__ = {
-    'major': 0,
-    'minor': 5,
+    'major': 1,
+    'minor': 0,
     'micro': 0,
     'releaselevel': 'final',
     'serial': 0
 }
 
+
 def get_version():
+    """
+    Return the formatted version information
+    """
     vers = ["%(major)i.%(minor)i" % __version_info__, ]
 
     if __version_info__['micro']:

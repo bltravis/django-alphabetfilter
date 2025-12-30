@@ -4,6 +4,29 @@ Django AlphaFilter
 
 Django AlphaFilter was designed to work like Django's default ``date_hierarchy`` admin filter. It puts an clickable alphabet in the same location as the date hierarchy - at the top of the results list.
 
+**Changes in 1.0**
+* Only supports Django 1.9, 1.10 and 1.11
+* Supports Python 2.7 and 3.6
+* Added Tox test configuration
+
+**Changes in 0.7:**
+
+* Added a ``strip_params`` parameter to the template tag to strip out external query parameters.
+
+* Django 1.5 compatible.
+
+* Fall back to previous method of retrieving letters in Django 1.4, due to bug in Django's aggregation.
+
+* Fixed the encoding of "&" in the urls.
+
+* Added ``unfiltered_queryset`` to the context (Thanks to Ales Zabala Alava: https://github.com/shagi)
+
+**Changes in 0.6:**
+
+* Switched to Django querysets to retrieve letters. (Thanks to Ales Zabala Alava: https://github.com/shagi)
+
+* Django 1.4 compatible
+
 **Changes in 0.5:**
 
 * Added a new template tag to render the alphabet filter in a normal template using a queryset and field and optionally specified template.
@@ -14,7 +37,7 @@ Django AlphaFilter was designed to work like Django's default ``date_hierarchy``
 
 * Now includes documentation!
 
-**Changes in 0.3:** 
+**Changes in 0.3:**
 
 * The ``ModelAdmin`` class can now specify its own ``DEFAULT_ALPHABET`` to use instead of the global setting.
 
@@ -24,13 +47,9 @@ Django AlphaFilter was designed to work like Django's default ``date_hierarchy``
 Installation
 ============
 
-1. The easiest method is to use ``pip`` or ``easy_install``\ ::
+1. The easiest method is to use ``pip``\ ::
 
 	pip install django-alphafilter
-   
-   or ::
-
-	easy_install django-alphafilter
 
 2. If you download the source, you can install it by running the ``setup.py`` script::
 
@@ -63,10 +82,10 @@ You can override the ``DEFAULT_ALPHABET`` on a model-by-model basis by adding a 
 	class TestNameAdmin(admin.ModelAdmin):
 	    model = TestName
 	    alphabet_filter = 'sorted_name'
-    
-	    # A blank string only shows the characters in the database 	
+
+	    # A blank string only shows the characters in the database
 	    DEFAULT_ALPHABET = u''
-    
+
 
 
 The ordering of the alphabet will not stay the same as entered, it is sorted through Python's list sort method.
