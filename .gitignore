@@ -4,7 +4,6 @@ dev.db
 local_settings.py
 media/ugc
 doc_src/_build/
-src/
 pip-log.txt
 media/js/*.r*.js
 media/css/*.r*.css
@@ -15,3 +14,16 @@ media/css/*.r*.css
 build/
 dist/
 .venv/
+
+# uv
+uv.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
