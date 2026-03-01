@@ -163,7 +163,12 @@ class AlphabetFilterNode(Node):
         }]
         ctxt = {'choices': all_letters + choices}
 
-        tmpl = get_template(self.template_name)
+        try:
+            template_name = self.template_name.resolve(context)
+        except VariableDoesNotExist:
+            template_name = self.template_name.var
+
+        tmpl = get_template(template_name)
 
         if request is not None:
             return tmpl.render(ctxt, request)
